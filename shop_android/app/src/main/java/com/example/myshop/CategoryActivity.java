@@ -16,6 +16,8 @@ public class CategoryActivity extends AppCompatActivity {
     private EditText categoryNameEditText;
     private Button addButton;
 
+    ProgressBar progressBar = findViewById(R.id.progress_bar);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,12 +72,20 @@ public class CategoryActivity extends AppCompatActivity {
 
         String params = "category_name=" + URLEncoder.encode(categoryName, "UTF-8");
 
+        progressBar.setVisibility(View.VISIBLE);
+
+
         OutputStream outputStream = connection.getOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
         writer.write(params);
+        int progress = calculateProgress();
+        progressBar.setProgress(progress);
         writer.flush();
         writer.close();
         outputStream.close();
+
+        progressBar.setVisibility(View.GONE);
+
 
         int responseCode = connection.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
