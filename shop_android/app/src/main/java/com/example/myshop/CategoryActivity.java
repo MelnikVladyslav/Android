@@ -63,5 +63,27 @@ public class CategoryActivity extends AppCompatActivity {
             }
         });
 
+        URL url = new URL(BASE);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+
+        String params = "category_name=" + URLEncoder.encode(categoryName, "UTF-8");
+
+        OutputStream outputStream = connection.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+        writer.write(params);
+        writer.flush();
+        writer.close();
+        outputStream.close();
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String response = reader.readLine();
+            reader.close();
+        }
+
+
     }
 }
