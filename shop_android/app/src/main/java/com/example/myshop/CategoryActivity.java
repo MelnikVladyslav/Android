@@ -52,5 +52,16 @@ public class CategoryActivity extends AppCompatActivity {
                 Toast.makeText(CategoryActivity.this, "Помилка при додаванні категорії", Toast.LENGTH_SHORT).show();
             }
         });
+
+        EditText categoryNameEditText = findViewById(R.id.category_name);
+
+        Button addButton = findViewById(R.id.add_button);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String categoryName = categoryNameEditText.getText().toString();
+            }
+        });
+
     }
 }
