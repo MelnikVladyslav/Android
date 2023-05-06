@@ -93,6 +93,42 @@ public class CategoryActivity extends AppCompatActivity {
             String response = reader.readLine();
             reader.close();
         }
+// Отримання списку категорій з сервера
+        String url = "https://example.com/api/categories";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Перетворення JSON у список категорій
+                        List<Category> categories = new ArrayList<>();
+                        try {
+                            JSONArray jsonArray = response.getJSONArray("categories");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                Category category = new Category(
+                                        jsonObject.getInt("id"),
+                                        jsonObject.getString("name")
+                                );
+                                categories.add(category);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        // Відображення списку категорій
+                        ListView listView = findViewById(R.id.category_listview);
+                        CategoryListAdapter adapter = new CategoryListAdapter(MainActivity.this, categories);
+                        listView.setAdapter(adapter);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                });
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
 
 
     }

@@ -1,0 +1,12 @@
+<EditText
+    android:id="@+id/edit_text_category_name"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/hint_category_name"/>
+
+<Spinner
+android:id="@+id/spinner_category_color"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:entries="@array/category_colors"
+android:prompt="@string/prompt_category_color"/>
