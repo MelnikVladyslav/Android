@@ -57,4 +57,19 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                String imageBase64 = ""; // отримання фото як Base64,
+                public void saveUserPhoto(File file) throws IOException {
+                    CloseableHttpClient httpClient = HttpClients.createDefault();
+                    HttpPost uploadFile = new HttpPost("http://example.com/upload");
+                    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                    builder.addBinaryBody(
+                            "file",
+                            file,
+                            ContentType.APPLICATION_OCTET_STREAM,
+                            file.getName()
+                    );
+                    HttpEntity multipart = builder.build();
+                    uploadFile.setEntity(multipart);
+                    CloseableHttpResponse response = httpClient.execute(uploadFile);
+                    httpClient.close();
+                }
+
