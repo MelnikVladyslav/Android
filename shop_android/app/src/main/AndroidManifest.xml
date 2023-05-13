@@ -17,6 +17,9 @@
         android:theme="@style/Theme.Myshop"
         tools:targetApi="31">
         <activity
+            android:name=".RegisteryActivity"
+            android:exported="false" />
+        <activity
             android:name=".UpdateActivity"
             android:exported="false" />
         <activity

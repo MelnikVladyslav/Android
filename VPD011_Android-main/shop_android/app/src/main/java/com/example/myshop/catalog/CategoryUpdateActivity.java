@@ -13,11 +13,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.myshop.BaseActivity;
 import com.example.myshop.ChangeImageActivity;
 import com.example.myshop.R;
+import com.example.myshop.application.HomeApplication;
+import com.example.myshop.contants.Urls;
 import com.example.myshop.dto.category.CategoryCreateDTO;
+import com.example.myshop.dto.category.CategoryItemDTO;
+import com.example.myshop.dto.category.CategoryUpdateDTO;
 import com.example.myshop.service.CategoryNetwork;
+import com.example.myshop.utils.CommonUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -28,8 +35,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CategoryCreateActivity extends BaseActivity {
+public class CategoryUpdateActivity extends BaseActivity {
 
+    int id=0;
     int SELECT_CROPPER = 300;
     Uri uri = null;
     ImageView IVPreviewImage;
@@ -46,7 +54,7 @@ public class CategoryCreateActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_category_create);
+        setContentView(R.layout.activity_category_update);
         IVPreviewImage = findViewById(R.id.IVPreviewImage);
         textImageError=findViewById(R.id.textImageError);
 
@@ -58,28 +66,64 @@ public class CategoryCreateActivity extends BaseActivity {
         txtFieldCategoryPriority = findViewById(R.id.txtFieldCategoryPriority);
         txtFieldCategoryDescription = findViewById(R.id.txtFieldCategoryDescription);
 
+        Bundle b = getIntent().getExtras();
+        if(b!=null)
+            id=b.getInt("id");
+        //Toast.makeText(this, "Id = "+ id, Toast.LENGTH_SHORT).show();
+        initInput();
+
         setupError();
     }
 
-    public void handleCreateCategoryClick(View view) {
+    private void initInput() {
+        CommonUtils.showLoading();
+        CategoryNetwork
+                .getInstance()
+                .getJsonApi()
+                .getById(id)
+                .enqueue(new Callback<CategoryItemDTO>() {
+                    @Override
+                    public void onResponse(Call<CategoryItemDTO> call, Response<CategoryItemDTO> response) {
+                        CommonUtils.hideLoading();
+                        CategoryItemDTO cat = response.body();
+                        txtCategoryName.setText(cat.getName());
+                        txtCategoryPriority.setText(Integer.toString(cat.getPriority()));
+                        txtCategoryDescription.setText(cat.getDescription());
+                        String url = Urls.BASE+cat.getImage();
+                        Glide.with(HomeApplication.getAppContext())
+                                .load(url)
+                                .apply(new RequestOptions().override(600))
+                                .into(IVPreviewImage);
+                    }
+
+                    @Override
+                    public void onFailure(Call<CategoryItemDTO> call, Throwable t) {
+                        CommonUtils.hideLoading();
+                    }
+                });
+    }
+
+    public void handleUpdateCategoryClick(View view) {
         if(!validationForm()) {
             Toast.makeText(this, "Заповніть усі дані!", Toast.LENGTH_SHORT).show();
             return;
         }
-        CategoryCreateDTO model = new CategoryCreateDTO();
+        CategoryUpdateDTO model = new CategoryUpdateDTO();
+        model.setId(id);
         model.setName(txtCategoryName.getText().toString());
         model.setPriority(Integer.parseInt(txtCategoryPriority.getText().toString()));
         model.setDescription(txtCategoryDescription.getText().toString());
-        model.setImageBase64(uriGetBase64(uri));
+        if(uri!=null)
+            model.setImageBase64(uriGetBase64(uri));
 
         CategoryNetwork
                 .getInstance()
                 .getJsonApi()
-                .create(model)
+                .update(model)
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        Intent intent = new Intent(CategoryCreateActivity.this, CatalogActivity.class);
+                        Intent intent = new Intent(CategoryUpdateActivity.this, CatalogActivity.class);
                         startActivity(intent);
                         finish();
                     }
@@ -112,11 +156,7 @@ public class CategoryCreateActivity extends BaseActivity {
             txtFieldCategoryPriority.setError(getString(R.string.category_priority_required));
             isValid=false;
         }
-        if(uri==null)
-        {
-            textImageError.setVisibility(View.VISIBLE);
-            isValid=false;
-        }
+
         return isValid;
     }
 
@@ -223,7 +263,7 @@ public class CategoryCreateActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode==SELECT_CROPPER) {
             uri = (Uri) data.getParcelableExtra("croppedUri");
-            textImageError.setVisibility(View.INVISIBLE);
+
             IVPreviewImage.setImageURI(uri);
         }
     }
